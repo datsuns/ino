@@ -35,6 +35,7 @@ class Preprocess(Command):
 
         sketch = open(args.sketch, 'rt').read()
 
+        out.write('\n'.join(self.includes(sketch)))
         header = 'Arduino.h' if self.e.arduino_lib_version.major else 'WProgram.h'
         out.write('#include <%s>\n' % header)
         out.write('\n'.join(self.prototypes(sketch)))
@@ -46,6 +47,11 @@ class Preprocess(Command):
         regex = re.compile("[\\w\\[\\]\\*]+\\s+[&\\[\\]\\*\\w\\s]+\\([&,\\[\\]\\*\\w\\s]*\\)(?=\\s*\\{)")
         matches = regex.findall(src)
         return [m + ';' for m in matches]
+
+    def includes(self, src):
+        regex = re.compile("\\s*#.*")
+        matches = regex.findall(src)
+        return [m + "\n" for m in matches]
 
     def collapse_braces(self, src):
         """
